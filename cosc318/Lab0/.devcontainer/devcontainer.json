@@ -1,0 +1,14 @@
+{
+  "name": "Java Servlet with Tomcat",
+  "dockerFile": "../Dockerfile", 
+  "forwardPorts": [8080], 
+  "extensions": [
+    "vscjava.vscode-java-pack", 
+    "redhat.java" 
+  ],
+  "settings": {
+    "java.home": "/usr/lib/jvm/java-17-openjdk", 
+    "maven.executable.path": "/usr/bin/mvn" 
+  },
+  "postCreateCommand": "mvn clean install" 
+}
