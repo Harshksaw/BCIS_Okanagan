@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct MainTabView: View {
+struct ContentView: View {
     var body: some View {
         TabView {
             FirstView()
@@ -17,10 +17,7 @@ struct MainTabView: View {
         }
     }
 }
-//
-//  MainTabView.swift
-//  Lab5_TabbedApp
-//
-//  Created by harsh saw on 2025-02-26.
-//
 
+#Preview {
+    ContentView()
+}
