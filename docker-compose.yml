@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  video_generator:
+    build: .
+    container_name: video_generator
+    volumes:
+      - ./app:/app  # Mount local folder for input/output access
+    environment:
+      - INPUT_IMAGE=/app/input.jpg
+      - PROCESSED_IMAGE=/app/processed.jpg
+      - BACKGROUND_MUSIC=/app/background.mp3
+      - NARRATION_AUDIO=/app/voiceover.mp3
+      - OUTPUT_VIDEO=/app/output.mp4
+      - CAPTION_TEXT=This is a sample video.
+    command: ["python", "script.py"]

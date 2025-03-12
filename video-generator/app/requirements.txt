@@ -1,0 +1,4 @@
+pillow
+gtts
+moviepy
+ffmpeg-python
