@@ -7,17 +7,25 @@ This project generates a video from an image, adds a caption, and includes backg
 - Docker
 - Python 3.9 (if running locally)
 
-## Running with Docker
 
-1. Build the Docker image:
+## Running Streamlit with Docker
+1.
+    In the Folder video-generator open in terminal ->
+
+2. Build the Docker image (if not already built):
     ```sh
     docker build -t video-generator .
     ```
 
-2. Run the Docker container:
+3. Run the Docker container with Streamlit (exposing port 8501):
     ```sh
-    docker run --rm -v $(pwd)/video-generator/app:/app video-generator
+    docker compose up -d 
     ```
+4. open localhost 
+    ```
+        sh
+        http://0.0.0.0:8501
+    ```    
 
 ## Running Locally
 
@@ -30,21 +38,3 @@ This project generates a video from an image, adds a caption, and includes backg
     ```sh
     python video-generator/app/script.py
     ```
-
-## Environment Variables
-
-- `INPUT_IMAGE`: Path to the input image
-- `PROCESSED_IMAGE`: Path to the processed image
-- `BACKGROUND_MUSIC`: Path to the background music file
-- `NARRATION_AUDIO`: Path to the narration audio file
-- `OUTPUT_VIDEO`: Path to the output video file
-- `CAPTION_TEXT`: Text to be added as a caption
-
-## Files
-
-- `app/script.py`: Main Python script
-- `app/input.jpg`: Sample input image (or provide your own)
-- `app/background.mp3`: Background music file
-- `app/requirements.txt`: Python dependencies
-- `Dockerfile`: Docker configuration
-- `docker-compose.yml`: Docker Compose configuration
