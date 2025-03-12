@@ -7,11 +7,15 @@ RUN apt-get update && apt-get install -y ffmpeg
 # Set working directory
 WORKDIR /app
 
-# Copy necessary files
-COPY app/ /app/
+# Copy requirements file first to leverage Docker caching
+COPY app/requirements.txt /app/requirements.txt
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip and install dependencies
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Copy the rest of the application files
+COPY app/ /app/
 
 # Set environment variables (can be overridden in docker-compose)
 ENV INPUT_IMAGE="/app/input.jpg"

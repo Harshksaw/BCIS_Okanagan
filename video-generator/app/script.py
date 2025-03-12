@@ -1,7 +1,8 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
 from gtts import gTTS
-from moviepy.editor import ImageClip, AudioFileClip, TextClip, CompositeVideoClip
+
+from moviepy import ImageClip, AudioFileClip, TextClip, CompositeVideoClip
 
 
 INPUT_IMAGE = os.getenv("INPUT_IMAGE", "app/input.jpg")
