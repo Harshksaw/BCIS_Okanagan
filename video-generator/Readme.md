@@ -22,8 +22,7 @@ This project generates a video from an image, adds a caption, and includes backg
     docker compose up -d 
     ```
 4. open localhost 
-    ```
-        sh
+    ```sh
         http://0.0.0.0:8501
     ```    
 
