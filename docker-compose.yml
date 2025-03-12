@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  video-generator:
+    build: .
+    volumes:
+      - ./video-generator/app:/app
+    environment:
+      INPUT_IMAGE: "/app/input.jpg"
+      PROCESSED_IMAGE: "/app/processed.jpg"
+      BACKGROUND_MUSIC: "/app/background.mp3"
+      NARRATION_AUDIO: "/app/voiceover.mp3"
+      OUTPUT_VIDEO: "/app/output.mp4"
+      CAPTION_TEXT: "This is a sample video."
+    ports:
+      - "5000:5000"
+    command: python app.py

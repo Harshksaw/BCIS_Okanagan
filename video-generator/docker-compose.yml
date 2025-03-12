@@ -11,4 +11,6 @@ services:
       - NARRATION_AUDIO=/app/voiceover.mp3
       - OUTPUT_VIDEO=/app/output.mp4
       - CAPTION_TEXT=This is a sample video.
+    ports:
+      - "5002:5000"  # Expose port 5000 for the API
     command: ["python", "script.py"]
