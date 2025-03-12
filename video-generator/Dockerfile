@@ -1,26 +1,30 @@
-# Use official Python image as base
-FROM python:3.9-slim
+# Use official Python image
+FROM python:3.9
+
+# Install system dependencies
+RUN apt update && apt install -y \
+    ffmpeg \
+    imagemagick \
+    fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
+# Ensure ImageMagick policy allows MoviePy to work
+RUN sed -i 's|.*policy domain="path" rights="none".*|  <policy domain="path" rights="read" pattern="**" />|' /etc/ImageMagick-6/policy.xml
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements file first to leverage Docker caching
-COPY app/requirements.txt requirements.txt
+# Copy only requirements first (Docker caching)
+COPY requirements.txt .
 
-# Upgrade pip and install dependencies
-RUN pip install --upgrade pip
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application files
 COPY . .
 
-# Set environment variables (can be overridden in docker-compose)
-ENV INPUT_IMAGE="/app/input.jpg"
-ENV PROCESSED_IMAGE="/app/processed.jpg"
-ENV BACKGROUND_MUSIC="/app/background.mp3"
-ENV NARRATION_AUDIO="/app/voiceover.mp3"
-ENV OUTPUT_VIDEO="/app/output.mp4"
-ENV CAPTION_TEXT="This is a sample video."
+# Expose Streamlit port
+EXPOSE 8501
 
-# Run the script
-CMD ["python", "script.py"]
+# Run Streamlit (Container startup command is set in `docker-compose.yml`)
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

@@ -1,7 +1,7 @@
-streamlit
 pillow
 gtts
 moviepy
 ffmpeg-python
 pyttsx3
 flask
+streamlit

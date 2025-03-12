@@ -1,9 +1,9 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
 from gtts import gTTS
-from moviepy import ImageClip, AudioFileClip, TextClip, CompositeVideoClip
-from generatevoice import generate_voiceover
-from createvideo import create_video
+from moviepy import *
+# from generatevoice import generate_voiceover
+# from createvideo import create_video
 
 
 INPUT_IMAGE = os.getenv("INPUT_IMAGE", "app/input.jpg")
@@ -34,8 +34,8 @@ def process_image():
 
 def main():
     # process_image()
-    generate_voiceover()
-    create_video()
+    # generate_voiceover()
+    # create_video()
 
 if __name__ == "__main__":
     main()

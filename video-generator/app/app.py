@@ -1,52 +1,58 @@
-import os
-from flask import Flask, request, render_template, send_from_directory
-from generatevoice import generate_voiceover
-from createvideo import create_video
+import streamlit as st
+from moviepy import ImageClip, AudioFileClip, TextClip, CompositeVideoClip
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['OUTPUT_FOLDER'] = 'output'
+st.title("🎬 Video Generator with Streamlit")
 
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)
+st.write("Upload an image and an audio file to generate a video.")
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# Upload input files
+image_file = st.file_uploader("📸 Upload Image", type=["jpg", "jpeg", "png"])
+audio_file = st.file_uploader("🎵 Upload Audio", type=["mp3", "wav"])
+caption_text = st.text_input("📝 Enter Caption Text")
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return 'No file part'
-    file = request.files['file']
-    if file.filename == '':
-        return 'No selected file'
-    if file:
-        input_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        file.save(input_path)
-        os.environ['INPUT_IMAGE'] = input_path
-        os.environ['PROCESSED_IMAGE'] = os.path.join(app.config['OUTPUT_FOLDER'], 'processed.jpg')
-        os.environ['OUTPUT_VIDEO'] = os.path.join(app.config['OUTPUT_FOLDER'], 'output.mp4')
-        
-        process_image()
-        generate_voiceover()
-        create_video()
-        
-        return send_from_directory(app.config['OUTPUT_FOLDER'], 'output.mp4')
+if st.button("🚀 Generate Video"):
+    if image_file and audio_file and caption_text:
+        # Save files locally
+        image_path = "uploaded_image.png"
+        audio_path = "uploaded_audio.mp3"
+        output_video_path = "output_video.mp4"
 
-@app.route('/test', methods=['GET'])
-def test_with_existing_image():
-    print("Test route called")
-    input_path = os.path.join(app.config['UPLOAD_FOLDER'], 'test_image.jpg')
-    os.environ['INPUT_IMAGE'] = input_path
-    # os.environ['PROCESSED_IMAGE'] = os.path.join(app.config['OUTPUT_FOLDER'], 'processed.jpg')
-    os.environ['OUTPUT_VIDEO'] = os.path.join(app.config['OUTPUT_FOLDER'], 'output.mp4')
-    print("Input Image Path:", os.environ['INPUT_IMAGE'])
-    # process_image()
-    generate_voiceover()
-    create_video()
-    
-    return send_from_directory(app.config['OUTPUT_FOLDER'], 'output.mp4')
+        with open(image_path, "wb") as f:
+            f.write(image_file.getbuffer())
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5002)
+        with open(audio_path, "wb") as f:
+            f.write(audio_file.getbuffer())
+
+        st.success("Files uploaded successfully! Processing...")
+
+        # Load image as video
+        image_clip = ImageClip(image_path, duration=10)
+
+        # ✅ Fix: Use `set_duration()` Instead of `subclip()`
+        audio_clip = AudioFileClip(audio_path).subclipped(0, 10)
+
+        # Fix TextClip
+        text_clip = (
+            TextClip(
+                text=caption_text,
+                font_size=70,
+                font="./assets/Roboto-Black.ttf",
+                color="white",
+                size=image_clip.size,  # Match image size for better fit
+            )
+            .with_position(("center", 0.25), relative=True)
+            .with_duration(10)
+        )
+
+        # Combine image, text, and audio
+        video = CompositeVideoClip([image_clip, text_clip])
+        # video = video.set_audio(audio_clip)
+
+        # Save video
+        video.write_videofile(output_video_path, fps=24, codec="libx264")
+
+        # Show output video
+        st.video(output_video_path)
+
+    else:
+        st.error("Please upload all files and enter a caption.")
