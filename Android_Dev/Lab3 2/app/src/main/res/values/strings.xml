@@ -1,0 +1,10 @@
+<resources>
+
+    <string name="app_name">Lab2Good</string>
+    <string name="button_text">Settings</string>
+    <string name="main_title_text">Your Main Title</string>  <string name="main_body_text">Your Main Body Text. This can be a longer text that might require scrolling.</string>
+    <string name="settings_title">Settings</string>
+    <string name="dark_mode_text">Dark Mode</string>
+    <string name="back_button_text">Back</string>
+
+</resources>

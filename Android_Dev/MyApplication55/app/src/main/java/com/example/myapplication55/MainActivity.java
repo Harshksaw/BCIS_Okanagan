@@ -1,5 +1,6 @@
 package com.example.myapplication55;
 
+import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -10,15 +11,32 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
 
+    GridView gridView;
+    List<Shape> shapes;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        gridView = findViewById(R.id.gridView);
+        gridView.setNumColumns(2); // Optional if already in XML
+
+        shapes = new ArrayList<>();
+        shapes.add(new Shape("Sphere", R.drawable.sphere));
+        shapes.add(new Shape("Cube", R.drawable.cube));
+        shapes.add(new Shape("Cone", R.drawable.cone));
+        shapes.add(new Shape("Cylinder", R.drawable.cylinder));
+
+        ShapeAdapter adapter = new ShapeAdapter(this, shapes);
+        gridView.setAdapter(adapter);
+
+        gridView.setOnItemClickListener((parent, view, position, id) -> {
+            String shapeName = shapes.get(position).getName();
+            Intent intent = new Intent(MainActivity.this, SphereActivity.class);
+            intent.putExtra("shape", shapeName);
+            startActivity(intent);
         });
     }
 }
+
