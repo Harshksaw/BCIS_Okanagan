@@ -1,0 +1,22 @@
+FROM openjdk:17-slim
+
+# Install X11 libraries
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libxext6 \
+    libxrender1 \
+    libxtst6 \
+    libxi6 \
+    libxrandr2 \
+    libxfixes3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy source files
+COPY src /app/src
+
+# Compile all Java files
+RUN javac src/*.java
+
+# Run the GUI client
+CMD ["java", "src.TicTacToeGUIClient"]

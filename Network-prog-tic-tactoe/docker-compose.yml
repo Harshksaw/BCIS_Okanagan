@@ -1,0 +1,19 @@
+
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "5007:5007"
+    container_name: tictactoe-server
+    networks:
+      - tictactoe-network
+
+  # We don't define client services here because they need to be interactive
+  # Clients will be started individually as needed
+
+networks:
+  tictactoe-network:
+    driver: bridge

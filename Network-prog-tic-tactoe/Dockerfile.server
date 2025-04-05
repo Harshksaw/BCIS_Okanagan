@@ -1,0 +1,15 @@
+FROM openjdk:17-slim
+
+WORKDIR /app
+
+# Copy source directory
+COPY src /app/src
+
+# Compile all Java files
+RUN javac src/*.java
+
+# Expose the port
+EXPOSE 5007
+
+# Run the server with the package name
+CMD ["java", "src.MultiGameTicTacToeServer", "5007"]
