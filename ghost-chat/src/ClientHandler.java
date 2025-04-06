@@ -1,7 +1,7 @@
 // src/ClientHandler.java
 import java.io.*;
 import java.net.*;
-import java.util.Set;
+import java.util.*;
 
 public class ClientHandler implements Runnable {
     private Socket socket;
@@ -23,6 +23,11 @@ public class ClientHandler implements Runnable {
         
         // Process user selection
         String selection = in.readLine();
+        if (selection == null) {
+            System.out.println("Client disconnected during menu selection.");
+            throw new IOException("Client disconnected");
+        }
+        
         processMenuSelection(selection);
         
         // Only broadcast join message if not in anonymous mode
@@ -65,6 +70,48 @@ public class ClientHandler implements Runnable {
                 out.println("Invalid selection. Joining public chat.");
                 this.username = utils.UsernameGen.generate();
                 break;
+        }
+    }
+
+    public void run() {
+        try {
+            String msg;
+            while ((msg = in.readLine()) != null) {
+                if (msg.equalsIgnoreCase("/exit")) break;
+                
+                if (msg.startsWith("/")) {
+                    handleCommand(msg);
+                } else {
+                    String formattedMsg;
+                    if (anonymousMode) {
+                        formattedMsg = "[Ghost]: " + msg;
+                    } else {
+                        formattedMsg = "[" + username + "]: " + msg;
+                    }
+                    
+                    broadcast(formattedMsg);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Client disconnected.");
+        } finally {
+            try { socket.close(); } catch (IOException e) {}
+            clients.remove(this);
+            
+            if (!anonymousMode) {
+                if (currentRoom != null) {
+                    // Notify game if player was part of one
+                    currentRoom.playerLeftGame(username);
+                    
+                    currentRoom.removeMember(this);
+                    // Remove empty rooms
+                    if (currentRoom.getMemberCount() == 0) {
+                        Server.removeRoom(currentRoom);
+                    }
+                } else {
+                    broadcast("❌ " + username + " left.");
+                }
+            }
         }
     }
 
@@ -134,45 +181,6 @@ public class ClientHandler implements Runnable {
         room.addMember(this);
     }
 
-    public void run() {
-        try {
-            String msg;
-            while ((msg = in.readLine()) != null) {
-                if (msg.equalsIgnoreCase("/exit")) break;
-                
-                if (msg.startsWith("/")) {
-                    handleCommand(msg);
-                } else {
-                    String formattedMsg;
-                    if (anonymousMode) {
-                        formattedMsg = "[Ghost]: " + msg;
-                    } else {
-                        formattedMsg = "[" + username + "]: " + msg;
-                    }
-                    
-                    broadcast(formattedMsg);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Client disconnected.");
-        } finally {
-            try { socket.close(); } catch (IOException e) {}
-            clients.remove(this);
-            
-            if (!anonymousMode) {
-                if (currentRoom != null) {
-                    currentRoom.removeMember(this);
-                    // Remove empty rooms
-                    if (currentRoom.getMemberCount() == 0) {
-                        Server.removeRoom(currentRoom);
-                    }
-                } else {
-                    broadcast("❌ " + username + " left.");
-                }
-            }
-        }
-    }
-
     private void handleCommand(String cmd) {
         String[] parts = cmd.split("\\s+", 3);
         String command = parts[0].toLowerCase();
@@ -202,9 +210,80 @@ public class ClientHandler implements Runnable {
             case "/rooms":
                 listRooms();
                 break;
+            case "/bombtag":
+                startBombTagGame();
+                break;
+            case "/pass":
+                if (parts.length < 2) {
+                    sendMessage("Usage: /pass <username>");
+                } else {
+                    passBomb(parts[1]);
+                }
+                break;
+            case "/endgame":
+                endGame();
+                break;
+            case "/players":
+                listPlayers();
+                break;
             default:
                 sendMessage("Unknown command. Type /help for available commands.");
                 break;
+        }
+    }
+    
+    // BombTag game methods
+    private void startBombTagGame() {
+        if (currentRoom == null) {
+            sendMessage("You must be in a room to start a game.");
+            return;
+        }
+        
+        currentRoom.startBombTagGame();
+    }
+
+    private void passBomb(String targetUsername) {
+        if (currentRoom == null) {
+            sendMessage("You must be in a room to play.");
+            return;
+        }
+        
+        if (!currentRoom.isGameActive()) {
+            sendMessage("No Bomb Tag game is currently active. Start one with /bombtag");
+            return;
+        }
+        
+        if (!currentRoom.passBomb(username, targetUsername)) {
+            sendMessage("You don't have the bomb or the target player is not valid!");
+        }
+    }
+
+    private void endGame() {
+        if (currentRoom == null) {
+            sendMessage("You must be in a room to end a game.");
+            return;
+        }
+        
+        if (!currentRoom.isGameActive()) {
+            sendMessage("No Bomb Tag game is currently active.");
+            return;
+        }
+        
+        currentRoom.endBombTagGame();
+        sendMessage("You ended the Bomb Tag game.");
+    }
+
+    private void listPlayers() {
+        if (currentRoom == null) {
+            sendMessage("You must be in a room to list players.");
+            return;
+        }
+        
+        sendMessage("Players in this room:");
+        for (ClientHandler client : clients) {
+            if (client.currentRoom == this.currentRoom) {
+                sendMessage("- " + client.username);
+            }
         }
     }
 
@@ -215,6 +294,10 @@ public class ClientHandler implements Runnable {
         sendMessage("/whisper <username> <message> - Send a private message");
         sendMessage("/name <new_name> - Change your username");
         sendMessage("/rooms - List available public rooms");
+        sendMessage("/bombtag - Start a new Bomb Tag game");
+        sendMessage("/pass <username> - Pass the bomb to another player");
+        sendMessage("/endgame - End the current Bomb Tag game");
+        sendMessage("/players - List all players in the current room");
         sendMessage("/exit - Leave the chat");
     }
 

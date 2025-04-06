@@ -19,11 +19,15 @@ public class Server {
         System.out.println("Created default public room with ID: " + publicRoom.getRoomId());
         
         while (true) {
-            Socket socket = serverSocket.accept();
-            System.out.println("New client connected: " + socket.getInetAddress().getHostAddress());
-            ClientHandler handler = new ClientHandler(socket, clients);
-            clients.add(handler);
-            new Thread(handler).start();
+            try {
+                Socket socket = serverSocket.accept();
+                System.out.println("New client connected: " + socket.getInetAddress().getHostAddress());
+                ClientHandler handler = new ClientHandler(socket, clients);
+                clients.add(handler);
+                new Thread(handler).start();
+            } catch (IOException e) {
+                System.out.println("Error accepting client connection: " + e.getMessage());
+            }
         }
     }
     
@@ -33,8 +37,10 @@ public class Server {
     }
     
     public static void removeRoom(ChatRoom room) {
-        rooms.remove(room.getRoomId());
-        System.out.println("Room removed: " + room.getRoomName() + " (ID: " + room.getRoomId() + ")");
+        if (room != null) {
+            rooms.remove(room.getRoomId());
+            System.out.println("Room removed: " + room.getRoomName() + " (ID: " + room.getRoomId() + ")");
+        }
     }
     
     public static ChatRoom getRoomById(String roomId) {

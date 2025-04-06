@@ -4,11 +4,11 @@ FROM openjdk:17
 # Create app directory
 WORKDIR /app
 
-# Copy source files
-COPY ./src ./src
-
 # Make src/utils directory if it doesn't exist
 RUN mkdir -p src/utils
+
+# Copy source files
+COPY ./src ./src
 
 # Ensure output directory exists
 RUN mkdir -p out
