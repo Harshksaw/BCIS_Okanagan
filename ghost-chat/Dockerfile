@@ -7,8 +7,14 @@ WORKDIR /app
 # Copy source files
 COPY ./src ./src
 
+# Make src/utils directory if it doesn't exist
+RUN mkdir -p src/utils
+
+# Ensure output directory exists
+RUN mkdir -p out
+
 # Compile Java code
-RUN javac src/*.java src/utils/*.java -d out
+RUN javac -d out src/*.java src/utils/*.java
 
 # Expose the server port
 EXPOSE 5000
