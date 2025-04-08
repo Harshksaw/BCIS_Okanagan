@@ -63,7 +63,7 @@ public class Client {
                 // Remove the username extraction code since we don't need it anymore
             }
 
-      
+          
 
 
             socket.close();
