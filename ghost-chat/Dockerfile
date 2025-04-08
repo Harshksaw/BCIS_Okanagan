@@ -6,15 +6,19 @@ WORKDIR /app
 
 # Copy source files
 COPY ./src ./src
+COPY ./Client.java ./Client.java
 
-# Make src/utils directory if it doesn't exist
-RUN mkdir -p src/utils
-
-# Ensure output directory exists
+# Create output directory
 RUN mkdir -p out
 
-# Compile Java code
-RUN javac -d out src/*.java src/utils/*.java
+# Compile utils first
+RUN javac -d out src/utils/*.java
+
+# Compile other src files
+RUN javac -d out -cp out src/*.java 
+
+# Compile Client with proper classpath
+RUN javac -d out -cp out Client.java
 
 # Expose the server port
 EXPOSE 5000

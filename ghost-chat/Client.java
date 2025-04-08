@@ -1,27 +1,29 @@
 import java.io.*;
 import java.net.*;
+import utils.BannerGenerator;
+import utils.ColorUtils;
+import utils.LoadingAnimation;
+import utils.PokemonEmojis;
 
 public class Client {
-    public static void main(String[] args) {
-        String serverAddress = "localhost"; // Change this to the server's IP if connecting remotely
-        int serverPort = 5001;              // This should match your Docker port mapping
-
-        // If command line arguments are provided, use them for server address and port
-        if (args.length >= 1) {
-            serverAddress = args[0];
-        }
-        if (args.length >= 2) {
-            try {
-                serverPort = Integer.parseInt(args[1]);
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid port number. Using default port 5001.");
-            }
-        }
-
+    public static void main(String[] args) throws IOException {
+        // Display the Pokemon-themed banner
+        System.out.println(BannerGenerator.getPokeChatBanner());
+        System.out.println(BannerGenerator.getRandomPokemonAscii());
+        System.out.println(BannerGenerator.getPokeballSeparator());
+        
+        // Print welcome message
+        System.out.println(ColorUtils.CYAN + "Welcome to PokéChat! Chat with other Pokémon trainers" + ColorUtils.RESET);
+        System.out.println(ColorUtils.YELLOW + "Type " + ColorUtils.BOLD + "/exit" + 
+                           ColorUtils.RESET + ColorUtils.YELLOW + " to leave the chat" + ColorUtils.RESET);
+        System.out.println(BannerGenerator.getPokeballSeparator());
+        
+        // Show connecting animation
+        LoadingAnimation.playConnectionAnimation(5000);
+        
         try {
-            System.out.println("Connecting to " + serverAddress + ":" + serverPort + "...");
-            Socket socket = new Socket(serverAddress, serverPort);
-            System.out.println("Connected to the chat server!");
+            Socket socket = new Socket("localhost", 5001); // <-- Connects to Docker-mapped port
+            System.out.println(ColorUtils.GREEN + "Connected to PokéChat server!" + ColorUtils.RESET);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -32,10 +34,12 @@ public class Client {
                 String msg;
                 try {
                     while ((msg = in.readLine()) != null) {
-                        System.out.println(msg);
+                        // Apply color coding and emoji enhancement
+                        String enhancedMsg = ColorUtils.colorMessage(PokemonEmojis.addEmojis(msg));
+                        System.out.println(enhancedMsg);
                     }
                 } catch (IOException e) {
-                    System.out.println("Disconnected from server.");
+                    System.out.println(ColorUtils.RED + "Lost connection to the PokéChat server!" + ColorUtils.RESET);
                 }
             }).start();
 
@@ -43,15 +47,17 @@ public class Client {
             String input;
             while ((input = userIn.readLine()) != null) {
                 out.println(input);
-                if (input.equalsIgnoreCase("/exit")) break;
+                if (input.equalsIgnoreCase("/exit")) {
+                    LoadingAnimation.playPikachuRunningAnimation("See you next time, Trainer!", 2000);
+                    break;
+                }
             }
 
             socket.close();
-        } catch (UnknownHostException e) {
-            System.err.println("Can't find server at " + serverAddress + ":" + serverPort);
-        } catch (IOException e) {
-            System.err.println("Couldn't connect to " + serverAddress + ":" + serverPort);
-            System.err.println("Error: " + e.getMessage());
+            
+        } catch (ConnectException e) {
+            System.out.println(ColorUtils.RED + "Could not connect to the server. Is it running?" + ColorUtils.RESET);
+            System.out.println(ColorUtils.YELLOW + "Try checking if the server is started and the port is correct." + ColorUtils.RESET);
         }
     }
 }
