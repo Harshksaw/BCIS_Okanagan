@@ -8,6 +8,8 @@ import utils.PokemonEmojis;
 import utils.TypingEffect;
 
 public class Client {
+    private static final int SERVER_PORT = 5000; // Correct port to match server
+
     public static void main(String[] args) throws IOException {
         // Display the Pokemon-themed banner with typing effect
         System.out.println(BannerGenerator.getPokeChatBanner());
@@ -20,16 +22,26 @@ public class Client {
                 ColorUtils.RESET + ColorUtils.YELLOW + " to leave the chat" + ColorUtils.RESET, 20);
         System.out.println(BannerGenerator.getPokeballSeparator());
 
+        BufferedReader userIn = new BufferedReader(new InputStreamReader(System.in));
+
+        // Ask for server address
+        System.out.println(ColorUtils.CYAN + "Enter server IP address (or leave blank for localhost):" + ColorUtils.RESET);
+        String serverAddress = userIn.readLine().trim();
+        
+        // Use localhost if no address provided
+        if (serverAddress.isEmpty()) {
+            serverAddress = "localhost";
+        }
+        
         // Show connecting animation
         LoadingAnimation.playConnectionAnimation(5000);
 
         try {
-            Socket socket = new Socket("localhost", 5001); // <-- Connects to Docker-mapped port
-            System.out.println(ColorUtils.GREEN + "Connected to PokéChat server!" + ColorUtils.RESET);
+            Socket socket = new Socket(serverAddress, SERVER_PORT);
+            System.out.println(ColorUtils.GREEN + "Connected to PokéChat server at " + serverAddress + "!" + ColorUtils.RESET);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader userIn = new BufferedReader(new InputStreamReader(System.in));
 
             // Read from server
             new Thread(() -> {
@@ -46,34 +58,22 @@ public class Client {
             }).start();
 
             String input;
-            // Remove the username and random variables since we won't use them for typing
-            // effects
-
             while ((input = userIn.readLine()) != null) {
-                // Remove the typing indicator code completely
-
-                // Just send the input directly without delay
+                // Send input to server
                 out.println(input);
 
                 if (input.equalsIgnoreCase("/exit")) {
                     LoadingAnimation.playPikachuRunningAnimation("See you next time, Trainer!", 2000);
                     break;
                 }
-
-                // Remove the username extraction code since we don't need it anymore
             }
-
-          
-
 
             socket.close();
 
-        } catch (
-
-        ConnectException e) {
-            System.out.println(ColorUtils.RED + "Could not connect to the server. Is it running?" + ColorUtils.RESET);
-            System.out.println(ColorUtils.YELLOW + "Try checking if the server is started and the port is correct."
-                    + ColorUtils.RESET);
+        } catch (ConnectException e) {
+            System.out.println(ColorUtils.RED + "Could not connect to the server at " + serverAddress + ":" + SERVER_PORT + ColorUtils.RESET);
+            System.out.println(ColorUtils.YELLOW + "Make sure the server is running and the address/port are correct." + ColorUtils.RESET);
+            System.out.println(ColorUtils.YELLOW + "If connecting from another PC, ensure the server PC's firewall allows connections." + ColorUtils.RESET);
         }
     }
 }
