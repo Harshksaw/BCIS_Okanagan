@@ -17,8 +17,7 @@ RUN javac -d out src/utils/*.java
 # Compile other src files
 RUN javac -d out -cp out src/*.java 
 
-# Compile Client with proper classpath
-RUN javac -d out -cp out Client.java
+
 
 # Expose the server port
 EXPOSE 5000
