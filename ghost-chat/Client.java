@@ -63,10 +63,7 @@ public class Client {
                 // Remove the username extraction code since we don't need it anymore
             }
 
-            if (input.equalsIgnoreCase("/exit")) {
-                LoadingAnimation.playPikachuRunningAnimation("See you next time, Trainer!", 2000);
-                break;
-            }
+      
 
 
             socket.close();
