@@ -24,16 +24,32 @@ public class ClientHandler implements Runnable {
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.out = new PrintWriter(socket.getOutputStream(), true);
         
+        // Set a default username to prevent null pointer exceptions
+        this.username = "NewTrainer";
+        
         // Display welcome menu
         displayWelcomeMenu();
         
-        // Process user selection
-        String selection = in.readLine();
-        processMenuSelection(selection);
-        
-        // Only broadcast join message if not in anonymous mode
-        if (!anonymousMode) {
-            broadcast(JOIN_ICON + username + " appeared!");
+        try {
+            // Process user selection
+            String selection = in.readLine();
+            if (selection != null) {
+                processMenuSelection(selection);
+            } else {
+                // If selection is null, use default username
+                this.username = utils.PokemonUsernameGen.generate();
+            }
+            
+            // Only broadcast join message if not in anonymous mode
+            if (!anonymousMode) {
+                broadcast(JOIN_ICON + username + " appeared!");
+            }
+        } catch (Exception e) {
+            System.out.println("Error during user setup: " + e.getMessage());
+            // Ensure we have a valid username even if there's an error
+            if (this.username == null) {
+                this.username = utils.PokemonUsernameGen.generate();
+            }
         }
     }
 
@@ -49,6 +65,12 @@ public class ClientHandler implements Runnable {
     }
 
     private void processMenuSelection(String selection) throws IOException {
+        if (selection == null) {
+            // Handle null selection safely
+            this.username = utils.PokemonUsernameGen.generate();
+            return;
+        }
+        
         switch (selection) {
             case "1":
                 // Public chat - use Pokémon username generator
@@ -84,9 +106,15 @@ public class ClientHandler implements Runnable {
     private void createPrivateRoom() throws IOException {
         out.println("Enter your Battle Arena name:");
         String roomName = in.readLine();
+        if (roomName == null || roomName.trim().isEmpty()) {
+            roomName = "Private Arena";
+        }
         
         out.println("Enter password (leave empty for public arena):");
         String password = in.readLine();
+        if (password == null) {
+            password = "";
+        }
         
         // Get username
         out.println("Choose your Trainer name:");
@@ -111,6 +139,11 @@ public class ClientHandler implements Runnable {
     private void joinPrivateRoom() throws IOException {
         out.println("Enter Battle Arena ID:");
         String roomId = in.readLine();
+        if (roomId == null || roomId.trim().isEmpty()) {
+            out.println("No Arena ID provided. Joining the Pokémon Center instead.");
+            this.username = utils.PokemonUsernameGen.generate();
+            return;
+        }
         
         ChatRoom room = Server.getRoomById(roomId);
         if (room == null) {
@@ -122,6 +155,9 @@ public class ClientHandler implements Runnable {
         if (room.isPrivate()) {
             out.println("Enter Battle Arena password:");
             String password = in.readLine();
+            if (password == null) {
+                password = "";
+            }
             
             if (!room.authenticate(password)) {
                 out.println("Incorrect password. Joining the Pokémon Center instead.");
@@ -257,6 +293,11 @@ public class ClientHandler implements Runnable {
     }
 
     private void changeName(String newName) {
+        if (newName == null || newName.trim().isEmpty()) {
+            sendMessage("Invalid name. Your name remains " + this.username);
+            return;
+        }
+        
         String oldName = this.username;
         this.username = newName;
         broadcast(CHANGE_ICON + oldName + " evolved into " + newName + "!");
