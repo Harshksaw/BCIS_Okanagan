@@ -1,9 +1,4 @@
 package utils;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ColorUtils {
     // ANSI color codes
@@ -72,9 +67,13 @@ public class ColorUtils {
      * Returns a Pokémon type color based on username
      */
     public static String getPokemonTypeColor(String username) {
+        // Handle null usernames safely
+        if (username == null) {
+            return WHITE; // Default to white for null usernames
+        }
+        
         // Simple hashing to consistently assign a color based on username
-        // int hash = username.hashCode();
-        int hash = (username != null) ? username.hashCode() : 0;
+        int hash = username.hashCode();
         int colorIndex = Math.abs(hash % 7);
         
         switch (colorIndex) {
@@ -87,5 +86,17 @@ public class ColorUtils {
             case 6: return WHITE;   // Normal
             default: return RESET;
         }
+    }
+    
+    /**
+     * Colors a username based on its Pokémon type
+     */
+    public static String colorUsername(String username) {
+        if (username == null) {
+            return WHITE + "Unknown" + RESET;
+        }
+        
+        String color = getPokemonTypeColor(username);
+        return color + username + RESET;
     }
 }

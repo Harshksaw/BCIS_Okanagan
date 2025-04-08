@@ -271,18 +271,32 @@ public class ClientHandler implements Runnable {
     }
 
     private void broadcast(String msg) {
-        // Only broadcast join/leave messages for non-anonymous users
-        if ((msg.startsWith(JOIN_ICON) || msg.startsWith(LEAVE_ICON)) && anonymousMode) {
-            return; // Don't announce anonymous users joining/leaving
+        // If it's a chat message, color the username
+        if (msg.contains("[") && msg.contains("]:")) {
+            int start = msg.indexOf("[");
+            int end = msg.indexOf("]:");
+            
+            if (start >= 0 && end >= 0 && end > start) {
+                String usernameInBrackets = msg.substring(start + 1, end);
+                // Get color for this username
+                String color = utils.ColorUtils.getPokemonTypeColor(usernameInBrackets);
+                
+                // Create colored version of the message
+                String prefix = msg.substring(0, start + 1);
+                String coloredUsername = color + usernameInBrackets + utils.ColorUtils.RESET;
+                String suffix = msg.substring(end);
+                
+                // Broadcast the colored message
+                for (ClientHandler client : clients) {
+                    client.sendMessage(prefix + coloredUsername + suffix);
+                }
+                return;
+            }
         }
         
-        if (currentRoom != null) {
-            currentRoom.broadcast(msg);
-        } else {
-            // Fall back to global broadcast
-            for (ClientHandler client : clients) {
-                client.sendMessage(msg);
-            }
+        // For other messages, broadcast normally
+        for (ClientHandler client : clients) {
+            client.sendMessage(msg);
         }
     }
 }
