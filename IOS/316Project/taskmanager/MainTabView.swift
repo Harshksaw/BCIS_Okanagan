@@ -14,16 +14,22 @@ struct MainTabView: View {
                     Image(systemName: "plus.circle")
                     Text("Add Task")
                 }
+            
+            WeatherView()
+                .tabItem {
+                    Image(systemName: "cloud.sun.fill")
+                    Text("Weather")
+                }
 
             PomodoroView()
                 .tabItem {
                     Label("Pomodoro", systemImage: "timer")
                 }
 
-            AboutView()
+            ProfileView()
                 .tabItem {
-                    Image(systemName: "info.circle")
-                    Text("About")
+                    Image(systemName: "person.circle")
+                    Text("Profile")
                 }
         }
         .accentColor(.blue)

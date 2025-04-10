@@ -13,9 +13,12 @@ struct AddTaskView: View {
     @State private var taskPriority = "Medium"
     @State private var animateButton = false
     
+    // State for voice input
+    @State private var showVoiceInput = false
+    
     // Colors
     private let accentColor = Color(red: 0.0, green: 0.5, blue: 0.8) // Nice blue
-    private let backgroundColor = Color(red: 0.85, green: 0.95, blue: 1.0) // Light yellow
+    private let backgroundColor = Color(red: 0.85, green: 0.95, blue: 1.0) // Light blue
     private let cardColor = Color.white
     private let borderColor = Color(red: 0.85, green: 0.85, blue: 0.85) // Light gray
     
@@ -30,7 +33,7 @@ struct AddTaskView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Background color - light yellow
+                // Background color - light blue
                 backgroundColor
                     .edgesIgnoringSafeArea(.all)
                 
@@ -68,10 +71,32 @@ struct AddTaskView: View {
                                         .padding(.top, 10)
                                 }
                                 
-                                TextEditor(text: $description)
-                                    .frame(minHeight: 120)
-                                    .padding(5)
-                                    .background(Color.clear)
+                                VStack {
+                                    TextEditor(text: $description)
+                                        .frame(minHeight: 120)
+                                        .padding(5)
+                                        .background(Color.clear)
+                                    
+                                    HStack {
+                                        Spacer()
+                                        
+                                        // Voice input button for description
+                                        Button(action: {
+                                            showVoiceInput = true
+                                        }) {
+                                            Label("Voice Input", systemImage: "mic.fill")
+                                                .foregroundColor(accentColor)
+                                                .padding(.vertical, 8)
+                                                .padding(.horizontal, 12)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(accentColor, lineWidth: 1)
+                                                )
+                                        }
+                                    }
+                                    .padding(.horizontal, 5)
+                                    .padding(.bottom, 5)
+                                }
                             }
                             .background(cardColor)
                             .cornerRadius(10)
@@ -252,6 +277,10 @@ struct AddTaskView: View {
                     dismissButton: .default(Text("OK"))
                 )
             }
+            .sheet(isPresented: $showVoiceInput) {
+                // Voice input only for description field
+                VoiceInputView(text: $description, isPresented: $showVoiceInput)
+            }
         }
     }
     
@@ -310,57 +339,6 @@ struct AddTaskView: View {
 }
 
 // Extension to the API service to support the new fields
-extension APIService {
-    func addTask(
-        title: String,
-        description: String,
-        dueDate: String,
-        priority: String,
-        completion: @escaping (Task?, Error?) -> Void
-    ) {
-        guard let url = URL(string: "\(baseURL)/tasks") else {
-            completion(nil, NSError(domain: "Invalid URL", code: 0, userInfo: nil))
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let params: [String: Any] = [
-            "title": title,
-            "description": description,
-            "dueDate": dueDate,
-            "priority": priority
-        ]
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: params)
-        } catch {
-            completion(nil, error)
-            return
-        }
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(nil, error)
-                return
-            }
-            
-            guard let data = data else {
-                completion(nil, NSError(domain: "No data", code: 0, userInfo: nil))
-                return
-            }
-            
-            do {
-                let task = try JSONDecoder().decode(Task.self, from: data)
-                completion(task, nil)
-            } catch {
-                completion(nil, error)
-            }
-        }.resume()
-    }
-}
 
 // Preview for SwiftUI Canvas
 struct AddTaskView_Previews: PreviewProvider {
