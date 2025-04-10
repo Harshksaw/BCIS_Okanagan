@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const taskRoutes = require("./routes/tasks");
+const authRoutes = require("./routes/auth");
 
 const app = express();
 const PORT = 3000;
@@ -23,6 +24,7 @@ mongoose
 
 // Routes
 app.use("/api/tasks", taskRoutes);
+app.use("/api/auth", authRoutes);
 
 // Simple health check route
 app.get("/api", (req, res) => {
