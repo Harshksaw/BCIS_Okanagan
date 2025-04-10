@@ -50,13 +50,13 @@ struct ProfileView: View {
                         
                         InfoRow(title: "User ID", value: authService.currentUser?.id ?? "N/A")
                         
-                        Divider()
+//                        Divider()
+//                        
+//                        InfoRow(title: "Joined", value: formatDate())
                         
-                        InfoRow(title: "Joined", value: formatDate())
-                        
-                        Divider()
-                        
-                        InfoRow(title: "Account Type", value: "Standard")
+//                        Divider()
+//                        
+//                        InfoRow(title: "Account Type", value: "Standard")
                     }
                     .padding(.vertical)
                     .background(
