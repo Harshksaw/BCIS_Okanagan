@@ -38,5 +38,11 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to provide accurate weather information</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Your speech will be recognized to convert your voice to text for creating tasks</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to your microphone for voice-to-text functionality</string>
 </dict>
 </plist>

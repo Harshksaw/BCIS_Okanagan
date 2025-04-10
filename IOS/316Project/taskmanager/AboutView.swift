@@ -37,7 +37,7 @@ struct AboutView: View {
                         // Developer info card
                         InfoCard(
                             title: "Developer",
-                            content: "Parag Jindal",
+                            content: "Harsh saw",
                             icon: "person.fill",
                             iconColor: .blue
                         )

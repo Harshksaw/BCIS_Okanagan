@@ -2,25 +2,43 @@
 const express = require("express");
 const router = express.Router();
 const Task = require("../models/task");
+const mongoose = require("mongoose");
 
-// GET all tasks
+// GET tasks for a specific user
 router.get("/", async (req, res) => {
   try {
-    const tasks = await Task.find().sort({ createdAt: -1 });
-    const tasksWithTimestamps = tasks.map(task => ({
-      ...task.toObject(),
-      createdAt: task.createdAt.getTime(), // Convert `createdAt` to a timestamp
-    }));
-    res.status(200).json(tasksWithTimestamps);
+    const { userId } = req.query;
+    
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    // Validate userId format
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid userId format" });
+    }
+
+    const tasks = await Task.find({ userId }).sort({ createdAt: -1 });
+    res.status(200).json(tasks);
   } catch (error) {
     console.error("Error fetching tasks:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
-// GET a single task by ID
+
+// GET a single task by ID (with user verification)
 router.get("/:id", async (req, res) => {
   try {
-    const task = await Task.findById(req.params.id);
+    const { userId } = req.query;
+    
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const task = await Task.findOne({ 
+      _id: req.params.id,
+      userId
+    });
 
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
@@ -35,19 +53,29 @@ router.get("/:id", async (req, res) => {
 
 // CREATE a new task
 router.post("/", async (req, res) => {
-
-  console.log("Request body:", req.body); // Log the request body
   try {
-    const { title, description } = req.body;
+    const { title, description, userId, dueDate, priority } = req.body;
 
     if (!title) {
       return res.status(400).json({ message: "Title is required" });
+    }
+
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    // Validate userId format
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid userId format" });
     }
 
     const newTask = new Task({
       title,
       description: description || "",
       isDone: false,
+      userId,
+      dueDate: dueDate || null,
+      priority: priority || "Medium"
     });
 
     const savedTask = await newTask.save();
@@ -58,18 +86,23 @@ router.post("/", async (req, res) => {
   }
 });
 
-// UPDATE a task by ID
+// UPDATE a task by ID (with user verification)
 router.put("/:id", async (req, res) => {
   try {
-    const { title, description, isDone } = req.body;
-    const updatedTask = await Task.findByIdAndUpdate(
-      req.params.id,
-      { title, description, isDone },
+    const { title, description, isDone, dueDate, priority, userId } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const updatedTask = await Task.findOneAndUpdate(
+      { _id: req.params.id, userId },
+      { title, description, isDone, dueDate, priority },
       { new: true, runValidators: true }
     );
 
     if (!updatedTask) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: "Task not found or not authorized" });
     }
 
     res.status(200).json(updatedTask);
@@ -79,13 +112,19 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// TOGGLE task completion status
+// TOGGLE task completion status (with user verification)
 router.patch("/:id/toggle", async (req, res) => {
   try {
-    const task = await Task.findById(req.params.id);
+    const { userId } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const task = await Task.findOne({ _id: req.params.id, userId });
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: "Task not found or not authorized" });
     }
 
     task.isDone = !task.isDone;
@@ -98,13 +137,22 @@ router.patch("/:id/toggle", async (req, res) => {
   }
 });
 
-// DELETE a task by ID
+// DELETE a task by ID (with user verification)
 router.delete("/:id", async (req, res) => {
   try {
-    const deletedTask = await Task.findByIdAndDelete(req.params.id);
+    const { userId } = req.query;
+    
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const deletedTask = await Task.findOneAndDelete({ 
+      _id: req.params.id,
+      userId 
+    });
 
     if (!deletedTask) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: "Task not found or not authorized" });
     }
 
     res.status(200).json({ message: "Task deleted successfully" });
