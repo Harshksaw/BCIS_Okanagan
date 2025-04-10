@@ -12,6 +12,7 @@ class SimpleAuthService: ObservableObject {
     private let userDataKey = "user_data"
     
     // URL for auth endpoints
+//    private let baseURL = "http://3.99.223.30/api/auth"
     private let baseURL = "http://localhost:3000/api/auth"
     
     private init() {

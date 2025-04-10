@@ -5,7 +5,7 @@ class APIService {
     
     // Base URL of your Node.js API - update this when deploying
     let baseURL = "http://localhost:3000/api"
-    
+//    let baseURL = "http://3.99.223.30:3000/api"
     private init() {}
     
     // MARK: - API Calls
@@ -69,7 +69,10 @@ class APIService {
             
             if let data = data {
                 do {
-                    let tasks = try JSONDecoder().decode([Task].self, from: data)
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .iso8601
+                    let tasks = try decoder.decode([Task].self, from: data)
+
                     completion(tasks, nil)
                 } catch {
                     print("❌ JSON parsing error: \(error)")

@@ -109,59 +109,59 @@ struct AddTaskView: View {
                         .padding(.horizontal)
                         
                         // Due Date card
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Text("Due Date")
-                                    .font(.headline)
-                                    .foregroundColor(.gray)
-                                
-                                Spacer()
-                                
-                                Button(action: {
-                                    withAnimation(.spring()) {
-                                        showDueDatePicker.toggle()
-                                    }
-                                }) {
-                                    HStack {
-                                        Text(showDueDatePicker ? "Hide" : "Show")
-                                        Image(systemName: showDueDatePicker ? "chevron.up" : "chevron.down")
-                                    }
-                                    .font(.subheadline)
-                                    .foregroundColor(accentColor)
-                                }
-                            }
-                            
-                            if showDueDatePicker {
-                                DatePicker("", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
-                                    .datePickerStyle(GraphicalDatePickerStyle())
-                                    .frame(maxHeight: 400)
-                                    .padding(.vertical, 10)
-                                    .background(cardColor)
-                                    .cornerRadius(10)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(borderColor, lineWidth: 1)
-                                    )
-                                    .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 1)
-                            } else {
-                                HStack {
-                                    Text(formattedDate)
-                                        .foregroundColor(.black)
-                                    Spacer()
-                                    Image(systemName: "calendar")
-                                        .foregroundColor(accentColor)
-                                }
-                                .padding()
-                                .background(cardColor)
-                                .cornerRadius(10)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(borderColor, lineWidth: 1)
-                                )
-                                .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 1)
-                            }
-                        }
-                        .padding(.horizontal)
+//                        VStack(alignment: .leading, spacing: 10) {
+//                            HStack {
+//                                Text("Due Date")
+//                                    .font(.headline)
+//                                    .foregroundColor(.gray)
+//                                
+//                                Spacer()
+//                                
+//                                Button(action: {
+//                                    withAnimation(.spring()) {
+//                                        showDueDatePicker.toggle()
+//                                    }
+//                                }) {
+//                                    HStack {
+//                                        Text(showDueDatePicker ? "Hide" : "Show")
+//                                        Image(systemName: showDueDatePicker ? "chevron.up" : "chevron.down")
+//                                    }
+//                                    .font(.subheadline)
+//                                    .foregroundColor(accentColor)
+//                                }
+//                            }
+//                            
+//                            if showDueDatePicker {
+//                                DatePicker("", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
+//                                    .datePickerStyle(GraphicalDatePickerStyle())
+//                                    .frame(maxHeight: 400)
+//                                    .padding(.vertical, 10)
+//                                    .background(cardColor)
+//                                    .cornerRadius(10)
+//                                    .overlay(
+//                                        RoundedRectangle(cornerRadius: 10)
+//                                            .stroke(borderColor, lineWidth: 1)
+//                                    )
+//                                    .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 1)
+//                            } else {
+//                                HStack {
+//                                    Text(formattedDate)
+//                                        .foregroundColor(.black)
+//                                    Spacer()
+//                                    Image(systemName: "calendar")
+//                                        .foregroundColor(accentColor)
+//                                }
+//                                .padding()
+//                                .background(cardColor)
+//                                .cornerRadius(10)
+//                                .overlay(
+//                                    RoundedRectangle(cornerRadius: 10)
+//                                        .stroke(borderColor, lineWidth: 1)
+//                                )
+//                                .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 1)
+//                            }
+//                        }
+//                        .padding(.horizontal)
                         
                         // Priority picker
                         VStack(alignment: .leading, spacing: 10) {

@@ -8,50 +8,88 @@ struct Task: Identifiable, Codable {
     var isDone: Bool
     var createdAt: Date?
     
-    // Custom CodingKeys to map between Swift and MongoDB naming
+    // Optional properties with default values
+    var dueDate: Date?
+    var priority: TaskPriority?
+    var userId: String?
+
+    // Enum for standardized priority levels
+    enum TaskPriority: String, Codable {
+        case Low
+        case Medium
+        case High
+        case urgent
+    }
+
+    // Customized CodingKeys to handle potential JSON variations
     enum CodingKeys: String, CodingKey {
         case id = "_id"
         case title
         case description
         case isDone
         case createdAt
+        case dueDate
+        case priority
+        case userId
     }
-    init(from decoder: Decoder) throws {
-           let container = try decoder.container(keyedBy: CodingKeys.self)
-           id = try container.decode(String.self, forKey: .id)
-           title = try container.decode(String.self, forKey: .title)
-           description = try container.decode(String.self, forKey: .description)
-           isDone = try container.decode(Bool.self, forKey: .isDone)
-           
-           // Parse `createdAt` as ISO 8601 string
-           if let createdAtString = try? container.decode(String.self, forKey: .createdAt) {
-               let formatter = ISO8601DateFormatter()
-               createdAt = formatter.date(from: createdAtString)
-           } else {
-               createdAt = nil
-           }
-       }
-    
-    init(id: String, title: String, description: String = "", isDone: Bool = false, createdAt: Date? = nil) {
+
+    // Enhanced initializer with more comprehensive default handling
+    init(
+        id: String = UUID().uuidString,
+        title: String,
+        description: String = "",
+        isDone: Bool = false,
+        createdAt: Date? = Date(),
+        dueDate: Date? = nil,
+        priority: TaskPriority? = .Low,
+        userId: String? = nil
+    ) {
         self.id = id
         self.title = title
         self.description = description
         self.isDone = isDone
-        self.createdAt = createdAt
+        self.createdAt = createdAt ?? Date()
+        self.dueDate = dueDate
+        self.priority = priority
+        self.userId = userId
+    }
+
+    // Custom decoder to handle potential data inconsistencies
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Decode basic required fields
+        id = try container.decode(String.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        description = try container.decodeIfPresent(String.self, forKey: .description) ?? ""
+        isDone = try container.decodeIfPresent(Bool.self, forKey: .isDone) ?? false
+        
+        // Handle createdAt with flexible parsing
+        if let createdAtString = try? container.decodeIfPresent(String.self, forKey: .createdAt) {
+            let formatter = ISO8601DateFormatter()
+            createdAt = formatter.date(from: createdAtString)
+        } else {
+            createdAt = Date()
+        }
+        
+        // Flexible decoding for optional fields
+        dueDate = try? container.decodeIfPresent(Date.self, forKey: .dueDate)
+        priority = try? container.decodeIfPresent(TaskPriority.self, forKey: .priority)
+        userId = try? container.decodeIfPresent(String.self, forKey: .userId)
     }
 }
 
-// Extension to create a sample task for previews
+// Extended sample data with more comprehensive examples
+
+// Optional: Add some utility methods
 extension Task {
-    static var sampleTask: Task {
-        Task(id: "sample123", title: "Sample Task", description: "This is a sample task", isDone: false)
+    // Method to update task status
+    mutating func toggleDone() {
+        isDone.toggle()
     }
     
-    static var sampleTasks: [Task] {
-        [
-            Task(id: "1", title: "Complete project", description: "Finish the iOS project", isDone: false),
-            Task(id: "2", title: "Buy groceries", description: "Milk, eggs, bread", isDone: true),
-            Task(id: "3", title: "Call mom", description: "", isDone: false)
-        ]
+    // Method to update priority
+    mutating func updatePriority(to newPriority: TaskPriority) {
+        priority = newPriority
     }
 }

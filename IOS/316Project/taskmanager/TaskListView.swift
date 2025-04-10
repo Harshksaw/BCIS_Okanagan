@@ -16,14 +16,14 @@ struct TaskListView: View {
 
     // Color themes for tasks
     let taskColorThemes: [[Color]] = [
-        [.blue, .blue.opacity(0.15)],               // Blue theme
-        [.purple, .purple.opacity(0.15)],             // Purple theme
-        [.green, .green.opacity(0.15)],               // Green theme
-        [.orange, .orange.opacity(0.15)],             // Orange theme
-        [.pink, .pink.opacity(0.15)],                 // Pink theme
-        [.teal, .teal.opacity(0.15)],                 // Teal theme
-        [.indigo, .indigo.opacity(0.15)]              // Indigo theme
-    ]
+         [Color(red: 0.0, green: 0.0, blue: 1.0), Color(red: 0.0, green: 0.0, blue: 1.0, opacity: 0.15)],               // Blue theme
+         [Color(red: 0.5, green: 0.0, blue: 0.5), Color(red: 0.5, green: 0.0, blue: 0.5, opacity: 0.15)],             // Purple theme
+         [Color(red: 0.0, green: 0.5, blue: 0.0), Color(red: 0.0, green: 0.5, blue: 0.0, opacity: 0.15)],               // Green theme
+         [Color(red: 1.0, green: 0.5, blue: 0.0), Color(red: 1.0, green: 0.5, blue: 0.0, opacity: 0.15)],             // Orange theme
+         [Color(red: 1.0, green: 0.0, blue: 0.5), Color(red: 1.0, green: 0.0, blue: 0.5, opacity: 0.15)],                 // Pink theme
+         [Color(red: 0.0, green: 0.5, blue: 0.5), Color(red: 0.0, green: 0.5, blue: 0.5, opacity: 0.15)],                 // Teal theme
+         [Color(red: 0.0, green: 0.0, blue: 0.75), Color(red: 0.0, green: 0.0, blue: 0.75, opacity: 0.15)]              // Indigo theme
+     ]
     
     var body: some View {
         NavigationView {
@@ -287,62 +287,172 @@ struct TaskRowEnhanced: View {
     let colorScheme: [Color]
     @State private var isHovered = false
     
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(task.title)
-                    .font(.headline)
-                    .foregroundColor(task.isDone ? .secondary : .primary)
-                    .strikethrough(task.isDone, color: .secondary)
-                
-                if !task.description.isEmpty {
-                    Text(task.description)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
-                
-                if let createdAt = task.createdAt {
-                    Text(dateFormatter.string(from: createdAt))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            Spacer()
-            
-            Button(action: onToggle) {
-                ZStack {
-                    Circle()
-                        .fill(task.isDone ? colorScheme[0] : Color.clear)
-                        .frame(width: 28, height: 28)
-                    
-                    Circle()
-                        .stroke(task.isDone ? colorScheme[0] : Color.gray, lineWidth: 2)
-                        .frame(width: 28, height: 28)
-                    
-                    if task.isDone {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
-                    }
-                }
-                .scaleEffect(isHovered ? 1.1 : 1.0)
-                .animation(.spring(response: 0.2), value: isHovered)
-            }
-            .buttonStyle(BorderlessButtonStyle())
-          
+    // Separate method to create priority view
+    private func priorityView() -> some View {
+        guard let priority = task.priority else {
+            return AnyView(EmptyView())
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(task.isDone ? colorScheme[1].opacity(0.5) : colorScheme[1])
+        
+        return AnyView(
+            HStack {
+                Image(systemName: priorityIcon(for: priority))
+                    .foregroundColor(priorityColor(for: priority))
+                
+                Text(priority.rawValue.capitalized)
+                    .font(.caption)
+                    .foregroundColor(priorityColor(for: priority))
+            }
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(colorScheme[0], lineWidth: 1)
+    }
+    
+    // Separate method to create due date view
+    private func dueDateView() -> some View {
+        
+        
+        
+        guard let dueDate = task.dueDate else {
+            return AnyView(EmptyView())
+        }
+        
+        return AnyView(
+            HStack {
+                Image(systemName: "calendar")
+                    .foregroundColor(.blue)
+                
+                Text("Due: \(dateFormatter.string(from: dueDate))")
+                    .font(.caption)
+                    .foregroundColor(dateForegroundColor(for: dueDate))
+            }
         )
-        .contentShape(RoundedRectangle(cornerRadius: 16))
+    }
+    
+    var body: some View {
+           HStack {
+               VStack(alignment: .leading, spacing: 6) {
+                   Text(task.title)
+                       .font(.headline)
+                       .foregroundColor(task.isDone ? .secondary : .primary)
+                       .strikethrough(task.isDone, color: .secondary)
+                   
+                   if !task.description.isEmpty {
+                       Text(task.description)
+                           .font(.subheadline)
+                           .foregroundColor(.secondary)
+                           .lineLimit(2)
+                   }
+                   
+                   // Due Date Display
+                   if let dueDate = task.dueDate {
+                       HStack {
+                           Image(systemName: "calendar")
+                               .foregroundColor(.blue)
+                           
+                           Text("Due: \(dateFormatter.string(from: dueDate))")
+                               .font(.caption)
+                               .foregroundColor(dateForegroundColor(for: dueDate))
+                       }
+                   }
+                   
+                   // Priority Display
+                   if let priority = task.priority {
+                       HStack {
+                           Image(systemName: priorityIcon(for: priority))
+                               .foregroundColor(priorityColor(for: priority))
+                           
+                           Text(priority.rawValue.capitalized)
+                               .font(.caption)
+                               .foregroundColor(priorityColor(for: priority))
+                       }
+                   }
+                   
+                   if let createdAt = task.createdAt {
+                       Text(dateFormatter.string(from: createdAt))
+                           .font(.caption)
+                           .foregroundColor(.secondary)
+                   }
+               }
+               
+               Spacer()
+               
+               Button(action: onToggle) {
+                   ZStack {
+                       Circle()
+                           .fill(task.isDone ? colorScheme[0] : Color.clear)
+                           .frame(width: 28, height: 28)
+                       
+                       Circle()
+                           .stroke(task.isDone ? colorScheme[0] : Color.gray, lineWidth: 2)
+                           .frame(width: 28, height: 28)
+                       
+                       if task.isDone {
+                           Image(systemName: "checkmark")
+                               .font(.system(size: 14, weight: .bold))
+                               .foregroundColor(.white)
+                       }
+                   }
+                   .scaleEffect(isHovered ? 1.1 : 1.0)
+                   .animation(.spring(response: 0.2), value: isHovered)
+               }
+               .buttonStyle(BorderlessButtonStyle())
+           }
+           .padding()
+           .background(
+               RoundedRectangle(cornerRadius: 16)
+                   .fill(task.isDone ? colorScheme[1].opacity(0.5) : colorScheme[1])
+           )
+           .overlay(
+               RoundedRectangle(cornerRadius: 16)
+                   .stroke(colorScheme[0], lineWidth: 1)
+           )
+           .contentShape(RoundedRectangle(cornerRadius: 16))
+       }
+    
+    // Updated helper methods to work with TaskPriority enum
+    private func priorityIcon(for priority: Task.TaskPriority) -> String {
+        switch priority {
+        case .High, .urgent:
+            return "exclamationmark.triangle.fill"
+        case .Medium:
+            return "minus.circle.fill"
+        case .Low:
+            return "arrow.down.circle.fill"
+        }
+    }
+    
+    private func priorityColor(for priority: Task.TaskPriority) -> Color {
+        switch priority {
+        case .High, .urgent:
+            return .red
+        case .Medium:
+            return .orange
+        case .Low:
+            return .green
+        }
+    }
+    
+    private func parseDate(_ dateString: String) -> Date? {
+        let formatter = ISO8601DateFormatter()
+        return formatter.date(from: dateString)
+    }
+    
+    private func dateForegroundColor(for date: Date) -> Color {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        if calendar.isDate(date, inSameDayAs: now) {
+            return .red
+        }
+        
+        if date < now {
+            return .red
+        }
+        
+        if let daysUntil = calendar.dateComponents([.day], from: now, to: date).day,
+           daysUntil <= 3 {
+            return .orange
+        }
+        
+        return .blue
     }
     
     private var dateFormatter: DateFormatter {
@@ -352,7 +462,6 @@ struct TaskRowEnhanced: View {
         return formatter
     }
 }
-
 // Loading animation view
 struct LoadingView: View {
     @State private var isAnimating = false
@@ -581,12 +690,12 @@ struct AddTaskSheetView: View {
 }
 
 // Extension to make hover state work on iOS
-extension View {
-    func onHover(perform action: @escaping (Bool) -> Void) -> some View {
-        #if os(macOS)
-        return self.onHover(perform: action)
-        #else
-        return self // No-op on iOS
-        #endif
-    }
-}
+//extension View {
+//    func onHover(perform action: @escaping (Bool) -> Void) -> some View {
+//        #if os(macOS)
+//        return self.onHover(perform: action)
+//        #else
+//        return self // No-op on iOS
+//        #endif
+//    }
+//}
