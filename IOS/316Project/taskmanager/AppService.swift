@@ -69,7 +69,10 @@ class APIService {
             
             if let data = data {
                 do {
-                    let tasks = try JSONDecoder().decode([Task].self, from: data)
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .iso8601
+                    let tasks = try decoder.decode([Task].self, from: data)
+
                     completion(tasks, nil)
                 } catch {
                     print("❌ JSON parsing error: \(error)")
