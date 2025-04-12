@@ -1,15 +1,14 @@
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
-
 }
 
 android {
-    namespace = "com.example.firebase_app"
+    namespace = "com.example.firebaseapp"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.firebase_app"
+        applicationId = "com.example.firebaseapp"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -31,7 +30,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
 }
 
 dependencies {
@@ -44,7 +42,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
-
     implementation("com.google.firebase:firebase-analytics")
-
+    implementation("com.google.firebase:firebase-database")
 }
