@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "189532117782",
+    "project_id": "android-okanagan",
+    "storage_bucket": "android-okanagan.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189532117782:android:17f42907327cacaa110e37",
+        "android_client_info": {
+          "package_name": "com.cosc326"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsOWVphKbzFol43lHmBLRG_Cz1hlfcIjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
