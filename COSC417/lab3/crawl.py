@@ -20,11 +20,11 @@ def create_request(url: str) -> Request:
 def fetch(req: Request, timeout_sec: int = 10) -> str | None:
     try:
         with urlopen(req, timeout=timeout_sec) as resp:
-            # Only accept 200 OK
+
             if getattr(resp, "status", 200) != 200:
                 return None
             raw = resp.read()
-            # decode as best-effort
+
             return raw.decode("utf-8", errors="replace")
     except Exception:
         return None
@@ -55,7 +55,7 @@ def crawl(start_url: str, steps: int = 10, delay_sec: int = 5) -> list[str]:
         html = fetch(req)
         if html:
             links = extract_links(html, url)
-            # simple breadth-first expansion
+
             for lk in links:
                 if lk not in seen:
                     queue.append(lk)
