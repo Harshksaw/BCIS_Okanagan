@@ -1,0 +1,24 @@
+# App Runner reads this when you choose "Source code repository" and config source = REPOSITORY
+# Docs: version/runtime/build/run keys, network port, env & secrets, etc.  :contentReference[oaicite:0]{index=0}
+version: 1.0
+runtime: python3
+
+build:
+  commands:
+    # Install Python deps into the build image
+    build:
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+
+run:
+  # (Optional) pin a major/minor Python runtime; omit to use latest minor within python3
+  runtime-version: 3.11
+  # Start your app
+  command: python app.py
+  # Tell App Runner which port the app listens on (defaults to 8080; we use 5000)
+  # App Runner also passes this in PORT env automatically.  :contentReference[oaicite:1]{index=1}
+  network:
+    port: 5000
+  env:
+    - name: APP_ENV
+      value: "production"
