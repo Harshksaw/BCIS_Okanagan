@@ -1,0 +1,12 @@
+{
+  "flask": {
+    "image": "harshksaw/visitor-app:latest",
+    "ports": {
+      "80": "HTTP"
+    }
+  },
+  "redis": {
+    "image": "redis:7-alpine",
+    "ports": {}
+  }
+}

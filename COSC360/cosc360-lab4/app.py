@@ -1,43 +1,38 @@
-
 import os
-
-import redis
 from flask import Flask, request
 
 app = Flask(__name__)
 
-myDB = redis.Redis(host='container-service-1.redis-cont', port=6379, decode_responses=True)
-# REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
-# REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
+# Simple in-memory counter
+visitor_count_val = 0
 
-# myDB = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)
-
-
-@app.route('/')
+@app.route("/")
 def home():
-    return "Welcome to my Flask + Redis App!"
+    return "Lab 4 Flask App - Running on AWS Lightsail", 200
 
+@app.route("/health")
+def health():
+    return "OK", 200
 
 @app.route("/static-page")
 def static_page():
-    with open("static.html", "r") as f:
-        return f.read()
+    try:
+        with open("static.html", "r") as f:
+            return f.read(), 200
+    except FileNotFoundError:
+        return "static.html not found", 404
 
 @app.route("/get-request")
 def get_request():
     name = request.args.get("name", "Guest")
-    return f"Hello, {name}!"
+    return f"Hello, {name}!", 200
 
-@app.route('/visitor_count')
+@app.route("/visitor_count")
 def visitor_count():
-    if not myDB.exists('visitors'):
-        myDB.set('visitors', 1)
-    else:
-        myDB.incrby('visitors', 1)
-    count = myDB.get('visitors')
-    return "You are visitor number: " + str(count)
+    global visitor_count_val
+    visitor_count_val += 1
+    return f"You are visitor number: {visitor_count_val}", 200
 
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=777, debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", "5000"))
+    app.run(host="0.0.0.0", port=port)

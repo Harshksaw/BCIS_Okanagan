@@ -1,0 +1,8 @@
+{
+  "flask": {
+    "image": "harshksaw/lab4-flask:prod",
+    "ports": {
+      "5000": "HTTP"
+    }
+  }
+}
