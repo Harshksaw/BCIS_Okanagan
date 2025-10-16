@@ -1,14 +1,17 @@
 import os
 from flask import Flask, request
+import redis
 
 app = Flask(__name__)
 
-# Simple in-memory counter
-visitor_count_val = 0
+
+redis_host = os.environ.get("REDIS_HOST", "redis.service.local")
+#on prod, lightsail container-server-1.redis-cont
+redis_client = redis.Redis(host=redis_host, port=6379, decode_responses=True)
 
 @app.route("/")
 def home():
-    return "Lab 4 Flask App - Running on AWS Lightsail", 200
+    return "Lab 4 - Express App on Lightsail", 200
 
 @app.route("/health")
 def health():
@@ -29,9 +32,11 @@ def get_request():
 
 @app.route("/visitor_count")
 def visitor_count():
-    global visitor_count_val
-    visitor_count_val += 1
-    return f"You are visitor number: {visitor_count_val}", 200
+    try:
+        count = redis_client.incr("visitor_count")
+        return f"You are visitor number: {count}", 200
+    except Exception as e:
+        return f"Error connecting to Redis: {str(e)}", 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5000"))

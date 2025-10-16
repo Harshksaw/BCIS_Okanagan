@@ -1,0 +1,14 @@
+{
+  "flask": {
+    "image": "nginx:alpine",
+    "ports": {
+      "80": "HTTP"
+    }
+  },
+  "redis": {
+    "image": "redis:alpine",
+    "ports": {
+      "6379": "TCP"
+    }
+  }
+}
