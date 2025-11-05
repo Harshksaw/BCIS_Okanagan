@@ -9,7 +9,7 @@ myID = secrets.token_hex(8)
 
 @app.route("/")
 def home():
-    return "Hello from COSC 360 Lab!"
+    return "Hello from COSC 360 Lab!,Harsh "
 
 @app.route("/static-page")
 def static_page():
@@ -26,5 +26,5 @@ def show_myid():
     return myID
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 80))
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
