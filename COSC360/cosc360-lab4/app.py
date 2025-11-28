@@ -1,42 +1,35 @@
 import os
-from flask import Flask, request
+import uuid
+from flask import Flask
 import redis
 
 app = Flask(__name__)
 
 
-redis_host = os.environ.get("REDIS_HOST", "redis.service.local")
-#on prod, lightsail container-server-1.redis-cont
-redis_client = redis.Redis(host=redis_host, port=6379, decode_responses=True)
+CONTAINER_ID = str(uuid.uuid4())
 
 @app.route("/")
 def home():
-    return "Lab 4 - Express App on Lightsail", 200
+    return """
+    Home Page 
+    """, 200
+
+@app.route("/myid")
+def myid():
+    return f"Container ID: {CONTAINER_ID}", 200
+
 
 @app.route("/health")
 def health():
     return "OK", 200
 
-@app.route("/static-page")
-def static_page():
-    try:
-        with open("static.html", "r") as f:
-            return f.read(), 200
-    except FileNotFoundError:
-        return "static.html not found", 404
+@app.route("/sidecar_visitor")
+def sidecar_visitor():
 
-@app.route("/get-request")
-def get_request():
-    name = request.args.get("name", "Guest")
-    return f"Hello, {name}!", 200
-
-@app.route("/visitor_count")
-def visitor_count():
-    try:
-        count = redis_client.incr("visitor_count")
-        return f"You are visitor number: {count}", 200
-    except Exception as e:
-        return f"Error connecting to Redis: {str(e)}", 500
+    redis_host = os.environ.get("REDIS_HOST", "localhost")
+    myDB = redis.Redis(host=redis_host, port=6379, decode_responses=True)
+    count = myDB.incr("visitor_count")
+    return f"You are visitor number: {count}", 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5000"))
