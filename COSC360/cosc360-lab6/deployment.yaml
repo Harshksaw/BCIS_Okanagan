@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab6-flask-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: lab6-flask
+  template:
+    metadata:
+      labels:
+        app: lab6-flask
+    spec:
+      containers:
+      - name: lab6-flask
+        image: harshksaw/lab6-gke-app:latest
+        ports:
+        - containerPort: 80
